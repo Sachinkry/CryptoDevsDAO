@@ -1,1 +1,4 @@
 just a DAO
+FakeNFTMarketplace deployed to: 0x700f867933050D47947Fa0A71190bB5eD0dF2187
+
+CryptoDevsDAOContract deployed to: 0x435f84A6641b8fb7EADFea7Ae59ae51F8b84ccae
