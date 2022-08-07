@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
-import { Contract, providers } from "ethers";
-import { formatEther } from "ethers/lib/utils";
+import { Contract, providers, utils } from "ethers";
+import { formatEther, parseEther } from "ethers/lib/utils";
 import Web3Modal from "web3modal";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -48,9 +48,10 @@ export default function Home() {
   // this code will run everytime there's a change in 'selectedTab' state variable
   // used to re-fetch all proposals in the DAO when user switches to the "View Proposals"
   useEffect(() => {
-    if (selectedTab === 'View proposals') {
+    if (selectedTab === 'View Proposals') {
       fetchAllProposals();
     }
+    console.log(proposals);
   }, [selectedTab]);
 
   // get provider or signer
@@ -152,6 +153,7 @@ export default function Home() {
         nayVotes: proposal.nayVotes.toString(),
         executed: proposal.executed,
       };
+      return parsedProposal;
     } catch (err) {
       console.error(err);
     }
@@ -166,7 +168,7 @@ export default function Home() {
         const proposal = await fetchProposalById(i);
         proposals.push(proposal);
       }
-      setNumProposals(proposals);
+      setProposals(proposals);
       console.log(proposals);
       return proposals;
     } catch (err) {
@@ -200,14 +202,24 @@ export default function Home() {
       const signer = await getProviderOrSigner(true);
       const daoContract = cryptoDevsDAOContractInstance(signer);
       const txn = await daoContract.executeProposal(proposalId);
+      // const value = proposalId
+      // console.log(value);
+      // const txn = await daoContract.executeProposal(proposalId, {
+      //   value: utils.parseEther(value.toString()),
+      // })
 
       setLoading(true);
       await txn.wait();
       setLoading(false);
       await fetchAllProposals();
-    } catch (err) {
-      console.error(err);
-      window.alert(err.data.message);
+    } catch (error) {
+      // console.error(error);
+      // window.alert(error.data.message);
+      if (error.data && error.data.message) {
+        window.alert(error.data.message)
+      } else {
+        window.alert(error)
+      }
     }
   }
   // get cryptodevs nft contract instance
@@ -265,7 +277,6 @@ export default function Home() {
       );
     }
   }
-
   // render 'View Proposals' tab content
   function renderViewProposalsTab() {
     if (loading) {
@@ -285,7 +296,7 @@ export default function Home() {
             <div key={index} className={styles.proposalCard}>
               <p>Proposal ID: {p.proposalId}</p>
               <p>Fake NFT to Purchase: {p.nftTokenId}</p>
-              <p>Deadline: {p.deadline.toLocalString()}</p>
+              <p>Deadline: {p.deadline.toLocaleString()}</p>
               <p>Yay Votes: {p.yayVotes} </p>
               <p>Nay Votes: {p.nayVotes} </p>
               <p>Executed?: {p.executed.toString()} </p>
@@ -296,7 +307,7 @@ export default function Home() {
                     onClick={() => voteOnProposal(p.proposalId, "YAY")}
                   >
                     Vote YAY
-                  </button>
+                  </button><br />
                   <button
                     className={styles.button}
                     onClick={() => voteOnProposal(p.proposalId, "NAY")}
@@ -308,7 +319,7 @@ export default function Home() {
                 <div className={styles.flex}>
                   <button
                     className={styles.button}
-                    onClick={() => executeProposal(p.proposalsId)}
+                    onClick={() => executeProposal(p.proposalId)}
                   >
                     Execute Proposal{" "}
                     {p.yayVotes > p.nayVotes ? "YAY" : "NAY"}
