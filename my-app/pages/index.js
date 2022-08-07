@@ -369,8 +369,6 @@ export default function Home() {
             </button>
             {renderTabs()}
           </div>
-          <br />
-          <button className={styles.button} onClick={connectWallet}>Connect Wallet</button>
         </div>
         <div>
           <img className={styles.image} src="/cryptodevs/0.svg" />
